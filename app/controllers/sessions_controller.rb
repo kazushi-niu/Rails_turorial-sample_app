@@ -9,6 +9,8 @@ class SessionsController < ApplicationController
     if user && user.authenticate(params[:session][:password])
       # ユーザーログイン後にユーザー情報のページにリダイレクトする
       log_in user
+      # ユーザーログイン後に永続セッション用の記憶トークンをcookieとデータベースに保存
+      remember user
       redirect_to user
     else
       # エラーメッセージを作成する
@@ -18,7 +20,7 @@ class SessionsController < ApplicationController
   end
   
   def destroy
-    log_out
+    log_out if logged_in?
     redirect_to root_url
   end
 end
