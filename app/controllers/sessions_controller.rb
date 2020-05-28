@@ -4,14 +4,23 @@ class SessionsController < ApplicationController
   
   def create
     # form_forから送られてきたemailを持つユーザーを探してuserに代入
-     @user = User.find_by(email: params[:session][:email].downcase)
+    @user = User.find_by(email: params[:session][:email].downcase)
     # userか存在して、userのパスワードが送られてきたものと一致するか
     if @user && @user.authenticate(params[:session][:password])
-      # ユーザーログイン後にユーザー情報のページにリダイレクトする
-      log_in @user
-      # ユーザーログイン後に永続セッション用の記憶トークンをcookieとデータベースに保存
-      params[:session][:remember_me] == '1' ? remember(@user) : forget(@user)
-      redirect_back_or @user
+      # userがactiveのとき
+      if @user.activated?
+        # ログインする
+        log_in @user
+        # :remember_meが１のとき@userを記憶、そうでなければuserを忘れる
+        params[:session][:remember_me] == '1' ? remember(@user) : forget(@user)
+        # SessionsHelperで定義したredirect_back_orメソッドを呼び出して
+        redirect_back_or @user
+      else
+        message  = "Account not activated. "
+        message += "Check your email for the activation link."
+        flash[:warning] = message
+        redirect_to root_url
+      end
     else
       # エラーメッセージを作成する
       flash.now[:danger] = 'Invalid email/password combination' 

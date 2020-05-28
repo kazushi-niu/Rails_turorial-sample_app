@@ -5,6 +5,7 @@ class UsersIndexTest < ActionDispatch::IntegrationTest
   def setup
     @admin     = users(:michael)
     @non_admin = users(:archer)
+    @non_activated = users(:non_activated)
   end
 
   test "index as admin including pagination and delete links" do
@@ -15,7 +16,7 @@ class UsersIndexTest < ActionDispatch::IntegrationTest
     # indexページが表示されるか？
     assert_template 'users/index'
     # ページネーションが表示されるか？
-    assert_select 'div.pagination'
+    assert_select 'div.pagination', count: 2
     # ページネーションUserに１ページ目を代入
     first_page_of_users = User.paginate(page: 1)
     # ページネーションの内容について確認
@@ -41,5 +42,14 @@ class UsersIndexTest < ActionDispatch::IntegrationTest
     get users_path
     # 削除ボタンが表示されていないか？
     assert_select 'a', text: 'delete', count: 0
+  end
+  
+  test "index as non_activated" do
+    log_in_as(@admin)
+    get users_path
+    # non_activatedユーザーが存在しないことを確認
+    assert_select 'a[href=?]', user_path(@non_activated), text: @non_activated.name, count: 0
+    get user_path(@non_activated)
+    assert_redirected_to root_path
   end
 end
