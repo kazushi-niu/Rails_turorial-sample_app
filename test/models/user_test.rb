@@ -77,4 +77,16 @@ class UserTest < ActiveSupport::TestCase
     # authenticated?(:remember, '') はfalseか？
     assert_not @user.authenticated?(:remember, '')
   end
+  
+  test "associated microposts should be destroyed" do
+    # userを保存
+    @user.save
+    # マイクロポストを作成
+    @user.microposts.create!(content: "Lorem ipsum")
+    # マイクロポストの数を前後でカウント
+    assert_difference 'Micropost.count', -1 do
+      # userを削除
+      @user.destroy
+    end
+  end
 end
