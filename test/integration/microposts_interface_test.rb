@@ -14,6 +14,8 @@ class MicropostsInterfaceTest < ActionDispatch::IntegrationTest
     get root_path
     # ページネーションが表示されるか
     assert_select 'div.pagination'
+    # 画像投稿用フォームが表示されるか
+    assert_select 'input[type=file]'
     
     
     # 無効な送信
@@ -26,9 +28,12 @@ class MicropostsInterfaceTest < ActionDispatch::IntegrationTest
     
     # 有効な送信
     content = "This micropost really ties the room together"
+    picture = fixture_file_upload('test/fixtures/rails.png', 'image/png')
     assert_difference 'Micropost.count', 1 do
-      post microposts_path, params: { micropost: { content: content } }
+      post microposts_path, params: { micropost: { content: content, picture: picture } }
     end
+    # 画像は投稿されたか
+    assert assigns(:micropost).picture?
     # ルートページにリダイレクトされるか
     assert_redirected_to root_url
     # 指定されたリダイレクト先に移動
