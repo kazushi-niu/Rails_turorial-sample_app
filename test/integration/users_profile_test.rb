@@ -27,5 +27,7 @@ class UsersProfileTest < ActionDispatch::IntegrationTest
       # マイクロポストの内容がHTML本文に入っているのか
       assert_match micropost.content, response.body
     end
+    assert_match @user.active_relationships.count.to_s, response.body
+    assert_match @user.passive_relationships.count.to_s, response.body
   end
 end
